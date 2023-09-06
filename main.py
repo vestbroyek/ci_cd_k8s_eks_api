@@ -34,9 +34,9 @@ def _logger():
     return log
 
 
-LOG = _logger()
-LOG.debug("Starting with log level: %s" % LOG_LEVEL )
-APP = Flask(__name__)
+log = _logger()
+log.debug("Starting with log level: %s" % LOG_LEVEL )
+app = Flask(__name__)
 
 def require_jwt(function):
     """
@@ -57,12 +57,12 @@ def require_jwt(function):
     return decorated_function
 
 
-@APP.route('/', methods=['POST', 'GET'])
+@app.route('/', methods=['POST', 'GET'])
 def health():
     return jsonify("Healthy")
 
 
-@APP.route('/auth', methods=['POST'])
+@app.route('/auth', methods=['POST'])
 def auth():
     """
     Create JWT token based on email.
@@ -71,10 +71,10 @@ def auth():
     email = request_data.get('email')
     password = request_data.get('password')
     if not email:
-        LOG.error("No email provided")
+        log.error("No email provided")
         return jsonify({"message": "Missing parameter: email"}, 400)
     if not password:
-        LOG.error("No password provided")
+        log.error("No password provided")
         return jsonify({"message": "Missing parameter: password"}, 400)
     body = {'email': email, 'password': password}
 
@@ -83,7 +83,7 @@ def auth():
     return jsonify(token=_get_jwt(user_data).decode('utf-8'))
 
 
-@APP.route('/contents', methods=['GET'])
+@app.route('/contents', methods=['GET'])
 def decode_jwt():
     """
     Check user token and return non-secret data
@@ -112,4 +112,4 @@ def _get_jwt(user_data):
     return jwt.encode(payload, JWT_SECRET, algorithm='HS256')
 
 if __name__ == '__main__':
-    APP.run(host='127.0.0.1', port=8080, debug=True)
+    app.run(host='127.0.0.1', port=8080, debug=True)
